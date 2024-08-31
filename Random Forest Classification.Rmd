@@ -1,18 +1,323 @@
 ---
-title: "R Notebook"
+title: "Random Forest Classification"
+author: "Ifeoma Okonye"
+date: "2024-03-26"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
-
-```{r}
-plot(cars)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+## Tasks {.tabset}
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+* **Random Forest Basics:**
+
+    * Understand Random Forest.
+    
+    * Create a Random Forest model.
+    
+* **Optimal Parameters:**
+
+    * Determine the best number of trees in the forest.
+    
+    * Identify the optimal variables used at each internal node.
+    
+* **Sample Visualization:**
+
+    * Plot Multi-Dimensional Scaling (MDS) using the Random Forest model.
+
+
+
+
+### Load Packages and Data.
+
+
+* Load packages and data needed. 
+
+  * For this exercise the packages that will be used are tidyverse, caret, and randomForest. 
+
+  
+
+
+```{r}
+
+library(pacman)
+p_load(tidyverse, randomForest, caret)
+
+
+#######################################################################################
+#loading the data
+#######################################################################################
+
+
+
+WC_data <- read.csv(WC_data, header = FALSE)
+head(WC_data)
+
+
+```
+
+
+
+
+
+### Split the data.
+
+
+```{r}
+#Set Seed
+set.seed(106)
+
+#splitting the data
+split <- sample.split(WC_data, splitratio = 0.75)
+
+#Get training data
+
+train <- subset(WC_data, split == "TRUE")
+
+#Get Test data
+
+test <- subset(WC_data, split == "FALSE")
+```
+
+
+
+
+### Build Random Forest model.
+
+* The confusion matrix for the forest with ntree trees and it is laid out as:
+
+
+
+|                    | **Present**                                             | **Absent**                                              |
+| ------------------ | ------------------------------------------------------- | ------------------------------------------------------- |
+| **Present**        | Number of bird present correctly called "present"       | Number of bird present incorrectly called "absent"      |
+| **Absent**         | Number of bird absent incorrectly called "present"      | Number of bird absent correctly called "absent"         |
+
+
+
+
+```{r}
+
+#Set Seed
+set.seed(106) 
+
+WC_data.imputed <- rfImpute(sd ~ .,  #sd = specie distribution
+                                 data = WC_data, 
+                                 iter = 6)  #iter specifies how many rf rfImpute() should build to estimate the missing values
+
+```
+
+There are 2 NA values in the dataset and this generates the OOB error rate for each estimate.
+
+
+```{r}
+
+#Set Seed
+set.seed(106)
+
+#the rf model
+SDmodel <- randomForest(sd ~ ., 
+                        data = WC_data.imputed, 
+                        Proximity = TRUE)
+SDmodel 
+
+
+
+#look at confusion matrix and p-values
+
+y_pred <- predict(SDmodel, newdata = WC_data.imputed[-1]) #1 is the sd variable which is being predicted and (-1) removes that variable
+
+confusionMatrix(y_pred, test[ , 1]) 
+
+```
+
+
+
+### Optimum nTrees.
+
+
+* Assess the optimal number of trees (nTrees) for the model - is the RF big enough?
+
+  * Helps enhance model performance and prevent overfitting.
+
+* Up to a point, the more trees in the forest, the better.
+
+    * You can tell when you've made enough when the OOB no longer improves.
+
+
+```{r}
+
+#Set Seed
+set.seed(106)
+
+#plotting the error rates for each tree based on a matrix within the model called err.rate
+head(SDmodel$err.rate, 5)
+
+oob.error.data <- data.frame(
+  Trees = rep(1:nrow(SDmodel$err.rate), times = 3),
+  Type = rep(c("OOB", "Present", "Absent"), each = nrow(SDmodel$err.rate)),
+  Error = c(SDmodel$err.rate[ , "OOB"],
+            SDmodel$err.rate[ , "Present"],
+            SDmodel$err.rate[ , "Absent"])
+)
+
+oob.error.data %>% 
+  ggplot(aes(Trees, Error)) +
+  geom_line(aes(color = Type))
+
+```
+
+
+
+```{r}
+
+#Set Seed
+set.seed(106)
+
+#making model with 1000 trees
+
+SDmodel_1000 <- randomForest(sd ~ ., 
+                             data = WC_data.imputed, 
+                             ntree = 1000, 
+                             Proximity = TRUE)
+SDmodel_1000 
+```
+
+
+
+```{r}
+
+
+#Set Seed
+set.seed(106)
+
+
+#to see if plotting with 1000 is better, plot error rate
+
+oob.error.data1 <- data.frame(
+  Trees = rep(1:nrow(SDmodel_1000$err.rate), times = 3),
+  Type = rep(c("OOB", "Present", "Absent"), each = nrow(SDmodel_1000$err.rate)),
+  Error = c(HDmodel_1000$err.rate[ , "OOB"],
+            HDmodel_1000$err.rate[ , "Present"],
+            HDmodel_1000$err.rate[ , "Absent"])
+)
+
+oob.error.data1 %>% 
+  ggplot(aes(Trees, Error)) +
+  geom_line(aes(color = Type))
+
+```
+
+
+
+
+
+
+### Optimum Variable Selection.
+
+
+* Evaluate the best number of variables to use at each internal node in the decision tree.
+
+```{r}
+
+#Set Seed
+set.seed(106)
+
+
+#Plot variable Importance
+
+varImpPlot(SDmodel)
+
+
+
+#Optimum Variables per node
+
+oob.values <- vector(length = 10) 
+
+for (i in 1:10) { 
+    temp.model <- temp.model <- randomForest(sd ~ ., data = WC_data.imputed, mtry=i, ntree=1000) 
+    oob.values[i] <- temp.model$err.rate[nrow(temp.model$err.rate),1]
+  }
+
+oob.values #print out the different oob error values and the one with the lowest value is the number of variables that works best.
+
+```
+
+
+
+
+
+### Final Random Forest Model.
+
+
+```{r}
+
+#Set Seed
+set.seed(106)
+
+
+## find the minimum error
+min(oob.values)
+## find the optimal value for mtry...
+mtryV <- which(oob.values == min(oob.values))
+## create a model for proximities using the best value for mtry
+FinalSD_model <- randomForest(sd ~ ., 
+                      data = WC_data.imputed,
+                      ntree = 600, 
+                      proximity = TRUE, 
+                      mtry = mtry)
+FinalSD_model
+```
+
+
+
+### Random Forest MDS Plot.
+
+A Multidimensional Scaling (MDS) plot is a visual representation of the relationships between objects in multidimensional space. 
+
+The distance between points on the plot indicates the dissimilarity between the samples. To find out more about MDS Plots, go [here](https://youtu.be/GEn-_dAyYME?si=N4G3R3lXmsoJe8YE).
+
+Now  we are going to:
+
+* Utilize the Random Forest model to generate a Multi-Dimensional Scaling (MDS) plot.
+
+* Represent samples in a reduced-dimensional space.
+
+
+
+
+```{r}
+
+
+#Set Seed
+set.seed(106)
+
+#this shows how each variable is related to each other
+
+distance.matrix <- as.dist(1-model$proximity) ## converting the proximity matrix into a distance matrix.
+
+mds.plot <- cmdscale(distance.matrix, eig = TRUE, x.ret = TRUE)
+
+## calculate the percentage of variation that each MDS axis accounts for...
+mds.var.per <- round(mds.plot$eig/sum(mds.plot$eig)*100, 1)
+
+## now make a fancy looking plot that shows the MDS axes and the variation:
+mds.values <- mds.plot$points
+mds.data <- data.frame(Sample=rownames(mds.values),
+                       X=mds.values[,1],
+                       Y=mds.values[,2],
+                       Status=WC_data.imputed$hd)
+
+ggplot(data=mds.data, aes(x=X, y=Y, label=Sample)) + 
+  geom_text(aes(color=Status)) +
+  theme_bw() +
+  xlab(paste("MDS1 - ", mds.var.per[1], "%", sep="")) +
+  ylab(paste("MDS2 - ", mds.var.per[2], "%", sep="")) +
+  ggtitle("MDS plot using (1 - Random Forest Proximities)")
+#ggsave(file="random_forest_mds_plot.pdf")
+
+
+```

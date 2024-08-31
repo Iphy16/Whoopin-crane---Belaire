@@ -9,9 +9,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Ifeoma Okonye" />
 
+<meta name="date" content="2024-03-26" />
 
-<title>R Notebook</title>
+<title>Random Forest Classification</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1746,37 +1748,354 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">R Notebook</h1>
+<h1 class="title toc-ignore">Random Forest Classification</h1>
+<h4 class="author">Ifeoma Okonye</h4>
+<h4 class="date">2024-03-26</h4>
 
 </div>
 
 
 <!-- rnb-text-begin -->
-<p>This is an <a href="http://rmarkdown.rstudio.com">R Markdown</a>
-Notebook. When you execute code within the notebook, the results appear
-beneath the code.</p>
-<p>Try executing this chunk by clicking the <em>Run</em> button within
-the chunk or by placing your cursor inside it and pressing
-<em>Ctrl+Shift+Enter</em>.</p>
+<!-- rnb-text-end -->
+<!-- rnb-text-begin -->
+<div id="tasks" class="section level2 tabset">
+<h2 class="tabset">Tasks</h2>
+<ul>
+<li><p><strong>Random Forest Basics:</strong></p>
+<ul>
+<li><p>Understand Random Forest.</p></li>
+<li><p>Create a Random Forest model.</p></li>
+</ul></li>
+<li><p><strong>Optimal Parameters:</strong></p>
+<ul>
+<li><p>Determine the best number of trees in the forest.</p></li>
+<li><p>Identify the optimal variables used at each internal
+node.</p></li>
+</ul></li>
+<li><p><strong>Sample Visualization:</strong></p>
+<ul>
+<li>Plot Multi-Dimensional Scaling (MDS) using the Random Forest
+model.</li>
+</ul></li>
+</ul>
+<div id="load-packages-and-data." class="section level3">
+<h3>Load Packages and Data.</h3>
+<ul>
+<li><p>Load packages and data needed.</p>
+<ul>
+<li>For this exercise the packages that will be used are tidyverse,
+caret, and randomForest.</li>
+</ul></li>
+</ul>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGxvdChjYXJzKVxuYGBgIn0= -->
-<pre class="r"><code>plot(cars)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5saWJyYXJ5KHBhY21hbilcbnBfbG9hZCh0aWR5dmVyc2UsIHJhbmRvbUZvcmVzdCwgY2FyZXQpXG5cblxuIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjXG4jbG9hZGluZyB0aGUgZGF0YVxuIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjXG5cblxuXG5XQ19kYXRhIDwtIHJlYWQuY3N2KFdDX2RhdGEsIGhlYWRlciA9IEZBTFNFKVxuaGVhZChXQ19kYXRhKVxuXG5cbmBgYCJ9 -->
+<pre class="r"><code>
+library(pacman)
+p_load(tidyverse, randomForest, caret)
+
+
+#######################################################################################
+#loading the data
+#######################################################################################
+
+
+
+WC_data &lt;- read.csv(WC_data, header = FALSE)
+head(WC_data)
+</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>Add a new chunk by clicking the <em>Insert Chunk</em> button on the
-toolbar or by pressing <em>Ctrl+Alt+I</em>.</p>
-<p>When you save the notebook, an HTML file containing the code and
-output will be saved alongside it (click the <em>Preview</em> button or
-press <em>Ctrl+Shift+K</em> to preview the HTML file).</p>
-<p>The preview shows you a rendered HTML copy of the contents of the
-editor. Consequently, unlike <em>Knit</em>, <em>Preview</em> does not
-run any R code chunks. Instead, the output of the chunk when it was last
-run in the editor is displayed.</p>
+</div>
+<div id="split-the-data." class="section level3">
+<h3>Split the data.</h3>
 <!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI1NldCBTZWVkXG5zZXQuc2VlZCgxMDYpXG5cbiNzcGxpdHRpbmcgdGhlIGRhdGFcbnNwbGl0IDwtIHNhbXBsZS5zcGxpdChXQ19kYXRhLCBzcGxpdHJhdGlvID0gMC43NSlcblxuI0dldCB0cmFpbmluZyBkYXRhXG5cbnRyYWluIDwtIHN1YnNldChXQ19kYXRhLCBzcGxpdCA9PSBcIlRSVUVcIilcblxuI0dldCBUZXN0IGRhdGFcblxudGVzdCA8LSBzdWJzZXQoV0NfZGF0YSwgc3BsaXQgPT0gXCJGQUxTRVwiKVxuYGBgIn0= -->
+<pre class="r"><code>#Set Seed
+set.seed(106)
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlIgTm90ZWJvb2siDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpUaGlzIGlzIGFuIFtSIE1hcmtkb3duXShodHRwOi8vcm1hcmtkb3duLnJzdHVkaW8uY29tKSBOb3RlYm9vay4gV2hlbiB5b3UgZXhlY3V0ZSBjb2RlIHdpdGhpbiB0aGUgbm90ZWJvb2ssIHRoZSByZXN1bHRzIGFwcGVhciBiZW5lYXRoIHRoZSBjb2RlLiANCg0KVHJ5IGV4ZWN1dGluZyB0aGlzIGNodW5rIGJ5IGNsaWNraW5nIHRoZSAqUnVuKiBidXR0b24gd2l0aGluIHRoZSBjaHVuayBvciBieSBwbGFjaW5nIHlvdXIgY3Vyc29yIGluc2lkZSBpdCBhbmQgcHJlc3NpbmcgKkN0cmwrU2hpZnQrRW50ZXIqLiANCg0KYGBge3J9DQpwbG90KGNhcnMpDQpgYGANCg0KQWRkIGEgbmV3IGNodW5rIGJ5IGNsaWNraW5nIHRoZSAqSW5zZXJ0IENodW5rKiBidXR0b24gb24gdGhlIHRvb2xiYXIgb3IgYnkgcHJlc3NpbmcgKkN0cmwrQWx0K0kqLg0KDQpXaGVuIHlvdSBzYXZlIHRoZSBub3RlYm9vaywgYW4gSFRNTCBmaWxlIGNvbnRhaW5pbmcgdGhlIGNvZGUgYW5kIG91dHB1dCB3aWxsIGJlIHNhdmVkIGFsb25nc2lkZSBpdCAoY2xpY2sgdGhlICpQcmV2aWV3KiBidXR0b24gb3IgcHJlc3MgKkN0cmwrU2hpZnQrSyogdG8gcHJldmlldyB0aGUgSFRNTCBmaWxlKS4NCg0KVGhlIHByZXZpZXcgc2hvd3MgeW91IGEgcmVuZGVyZWQgSFRNTCBjb3B5IG9mIHRoZSBjb250ZW50cyBvZiB0aGUgZWRpdG9yLiBDb25zZXF1ZW50bHksIHVubGlrZSAqS25pdCosICpQcmV2aWV3KiBkb2VzIG5vdCBydW4gYW55IFIgY29kZSBjaHVua3MuIEluc3RlYWQsIHRoZSBvdXRwdXQgb2YgdGhlIGNodW5rIHdoZW4gaXQgd2FzIGxhc3QgcnVuIGluIHRoZSBlZGl0b3IgaXMgZGlzcGxheWVkLg0K</div>
+#splitting the data
+split &lt;- sample.split(WC_data, splitratio = 0.75)
+
+#Get training data
+
+train &lt;- subset(WC_data, split == &quot;TRUE&quot;)
+
+#Get Test data
+
+test &lt;- subset(WC_data, split == &quot;FALSE&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="build-random-forest-model." class="section level3">
+<h3>Build Random Forest model.</h3>
+<ul>
+<li>The confusion matrix for the forest with ntree trees and it is laid
+out as:</li>
+</ul>
+<table>
+<colgroup>
+<col width="14%" />
+<col width="42%" />
+<col width="42%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Present</strong></th>
+<th><strong>Absent</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Present</strong></td>
+<td>Number of bird present correctly called “present”</td>
+<td>Number of bird present incorrectly called “absent”</td>
+</tr>
+<tr class="even">
+<td><strong>Absent</strong></td>
+<td>Number of bird absent incorrectly called “present”</td>
+<td>Number of bird absent correctly called “absent”</td>
+</tr>
+</tbody>
+</table>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG4jU2V0IFNlZWRcbnNldC5zZWVkKDEwNikgXG5cbldDX2RhdGEuaW1wdXRlZCA8LSByZkltcHV0ZShzZCB+IC4sICAjc2QgPSBzcGVjaWUgZGlzdHJpYnV0aW9uXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBkYXRhID0gV0NfZGF0YSwgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpdGVyID0gNikgICNpdGVyIHNwZWNpZmllcyBob3cgbWFueSByZiByZkltcHV0ZSgpIHNob3VsZCBidWlsZCB0byBlc3RpbWF0ZSB0aGUgbWlzc2luZyB2YWx1ZXNcblxuYGBgIn0= -->
+<pre class="r"><code>
+#Set Seed
+set.seed(106) 
+
+WC_data.imputed &lt;- rfImpute(sd ~ .,  #sd = specie distribution
+                                 data = WC_data, 
+                                 iter = 6)  #iter specifies how many rf rfImpute() should build to estimate the missing values
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>There are 2 NA values in the dataset and this generates the OOB error
+rate for each estimate.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG4jU2V0IFNlZWRcbnNldC5zZWVkKDEwNilcblxuI3RoZSByZiBtb2RlbFxuU0Rtb2RlbCA8LSByYW5kb21Gb3Jlc3Qoc2QgfiAuLCBcbiAgICAgICAgICAgICAgICAgICAgICAgIGRhdGEgPSBXQ19kYXRhLmltcHV0ZWQsIFxuICAgICAgICAgICAgICAgICAgICAgICAgUHJveGltaXR5ID0gVFJVRSlcblNEbW9kZWwgXG5cblxuXG4jbG9vayBhdCBjb25mdXNpb24gbWF0cml4IGFuZCBwLXZhbHVlc1xuXG55X3ByZWQgPC0gcHJlZGljdChTRG1vZGVsLCBuZXdkYXRhID0gV0NfZGF0YS5pbXB1dGVkWy0xXSkgIzEgaXMgdGhlIHNkIHZhcmlhYmxlIHdoaWNoIGlzIGJlaW5nIHByZWRpY3RlZCBhbmQgKC0xKSByZW1vdmVzIHRoYXQgdmFyaWFibGVcblxuY29uZnVzaW9uTWF0cml4KHlfcHJlZCwgdGVzdFsgLCAxXSkgXG5cbmBgYCJ9 -->
+<pre class="r"><code>
+#Set Seed
+set.seed(106)
+
+#the rf model
+SDmodel &lt;- randomForest(sd ~ ., 
+                        data = WC_data.imputed, 
+                        Proximity = TRUE)
+SDmodel 
+
+
+
+#look at confusion matrix and p-values
+
+y_pred &lt;- predict(SDmodel, newdata = WC_data.imputed[-1]) #1 is the sd variable which is being predicted and (-1) removes that variable
+
+confusionMatrix(y_pred, test[ , 1]) 
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="optimum-ntrees." class="section level3">
+<h3>Optimum nTrees.</h3>
+<ul>
+<li><p>Assess the optimal number of trees (nTrees) for the model - is
+the RF big enough?</p>
+<ul>
+<li>Helps enhance model performance and prevent overfitting.</li>
+</ul></li>
+<li><p>Up to a point, the more trees in the forest, the better.</p>
+<ul>
+<li>You can tell when you’ve made enough when the OOB no longer
+improves.</li>
+</ul></li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG4jU2V0IFNlZWRcbnNldC5zZWVkKDEwNilcblxuI3Bsb3R0aW5nIHRoZSBlcnJvciByYXRlcyBmb3IgZWFjaCB0cmVlIGJhc2VkIG9uIGEgbWF0cml4IHdpdGhpbiB0aGUgbW9kZWwgY2FsbGVkIGVyci5yYXRlXG5oZWFkKFNEbW9kZWwkZXJyLnJhdGUsIDUpXG5cbm9vYi5lcnJvci5kYXRhIDwtIGRhdGEuZnJhbWUoXG4gIFRyZWVzID0gcmVwKDE6bnJvdyhTRG1vZGVsJGVyci5yYXRlKSwgdGltZXMgPSAzKSxcbiAgVHlwZSA9IHJlcChjKFwiT09CXCIsIFwiUHJlc2VudFwiLCBcIkFic2VudFwiKSwgZWFjaCA9IG5yb3coU0Rtb2RlbCRlcnIucmF0ZSkpLFxuICBFcnJvciA9IGMoU0Rtb2RlbCRlcnIucmF0ZVsgLCBcIk9PQlwiXSxcbiAgICAgICAgICAgIFNEbW9kZWwkZXJyLnJhdGVbICwgXCJQcmVzZW50XCJdLFxuICAgICAgICAgICAgU0Rtb2RlbCRlcnIucmF0ZVsgLCBcIkFic2VudFwiXSlcbilcblxub29iLmVycm9yLmRhdGEgJT4lIFxuICBnZ3Bsb3QoYWVzKFRyZWVzLCBFcnJvcikpICtcbiAgZ2VvbV9saW5lKGFlcyhjb2xvciA9IFR5cGUpKVxuXG5gYGAifQ== -->
+<pre class="r"><code>
+#Set Seed
+set.seed(106)
+
+#plotting the error rates for each tree based on a matrix within the model called err.rate
+head(SDmodel$err.rate, 5)
+
+oob.error.data &lt;- data.frame(
+  Trees = rep(1:nrow(SDmodel$err.rate), times = 3),
+  Type = rep(c(&quot;OOB&quot;, &quot;Present&quot;, &quot;Absent&quot;), each = nrow(SDmodel$err.rate)),
+  Error = c(SDmodel$err.rate[ , &quot;OOB&quot;],
+            SDmodel$err.rate[ , &quot;Present&quot;],
+            SDmodel$err.rate[ , &quot;Absent&quot;])
+)
+
+oob.error.data %&gt;% 
+  ggplot(aes(Trees, Error)) +
+  geom_line(aes(color = Type))
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG4jU2V0IFNlZWRcbnNldC5zZWVkKDEwNilcblxuI21ha2luZyBtb2RlbCB3aXRoIDEwMDAgdHJlZXNcblxuU0Rtb2RlbF8xMDAwIDwtIHJhbmRvbUZvcmVzdChzZCB+IC4sIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICBkYXRhID0gV0NfZGF0YS5pbXB1dGVkLCBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbnRyZWUgPSAxMDAwLCBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgUHJveGltaXR5ID0gVFJVRSlcblNEbW9kZWxfMTAwMCBcbmBgYCJ9 -->
+<pre class="r"><code>
+#Set Seed
+set.seed(106)
+
+#making model with 1000 trees
+
+SDmodel_1000 &lt;- randomForest(sd ~ ., 
+                             data = WC_data.imputed, 
+                             ntree = 1000, 
+                             Proximity = TRUE)
+SDmodel_1000 </code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5cbiNTZXQgU2VlZFxuc2V0LnNlZWQoMTA2KVxuXG5cbiN0byBzZWUgaWYgcGxvdHRpbmcgd2l0aCAxMDAwIGlzIGJldHRlciwgcGxvdCBlcnJvciByYXRlXG5cbm9vYi5lcnJvci5kYXRhMSA8LSBkYXRhLmZyYW1lKFxuICBUcmVlcyA9IHJlcCgxOm5yb3coU0Rtb2RlbF8xMDAwJGVyci5yYXRlKSwgdGltZXMgPSAzKSxcbiAgVHlwZSA9IHJlcChjKFwiT09CXCIsIFwiUHJlc2VudFwiLCBcIkFic2VudFwiKSwgZWFjaCA9IG5yb3coU0Rtb2RlbF8xMDAwJGVyci5yYXRlKSksXG4gIEVycm9yID0gYyhIRG1vZGVsXzEwMDAkZXJyLnJhdGVbICwgXCJPT0JcIl0sXG4gICAgICAgICAgICBIRG1vZGVsXzEwMDAkZXJyLnJhdGVbICwgXCJQcmVzZW50XCJdLFxuICAgICAgICAgICAgSERtb2RlbF8xMDAwJGVyci5yYXRlWyAsIFwiQWJzZW50XCJdKVxuKVxuXG5vb2IuZXJyb3IuZGF0YTEgJT4lIFxuICBnZ3Bsb3QoYWVzKFRyZWVzLCBFcnJvcikpICtcbiAgZ2VvbV9saW5lKGFlcyhjb2xvciA9IFR5cGUpKVxuXG5gYGAifQ== -->
+<pre class="r"><code>
+
+#Set Seed
+set.seed(106)
+
+
+#to see if plotting with 1000 is better, plot error rate
+
+oob.error.data1 &lt;- data.frame(
+  Trees = rep(1:nrow(SDmodel_1000$err.rate), times = 3),
+  Type = rep(c(&quot;OOB&quot;, &quot;Present&quot;, &quot;Absent&quot;), each = nrow(SDmodel_1000$err.rate)),
+  Error = c(HDmodel_1000$err.rate[ , &quot;OOB&quot;],
+            HDmodel_1000$err.rate[ , &quot;Present&quot;],
+            HDmodel_1000$err.rate[ , &quot;Absent&quot;])
+)
+
+oob.error.data1 %&gt;% 
+  ggplot(aes(Trees, Error)) +
+  geom_line(aes(color = Type))
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="optimum-variable-selection." class="section level3">
+<h3>Optimum Variable Selection.</h3>
+<ul>
+<li>Evaluate the best number of variables to use at each internal node
+in the decision tree.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG4jU2V0IFNlZWRcbnNldC5zZWVkKDEwNilcblxuXG4jUGxvdCB2YXJpYWJsZSBJbXBvcnRhbmNlXG5cbnZhckltcFBsb3QoU0Rtb2RlbClcblxuXG5cbiNPcHRpbXVtIFZhcmlhYmxlcyBwZXIgbm9kZVxuXG5vb2IudmFsdWVzIDwtIHZlY3RvcihsZW5ndGggPSAxMCkgXG5cbmZvciAoaSBpbiAxOjEwKSB7IFxuICAgIHRlbXAubW9kZWwgPC0gdGVtcC5tb2RlbCA8LSByYW5kb21Gb3Jlc3Qoc2QgfiAuLCBkYXRhID0gV0NfZGF0YS5pbXB1dGVkLCBtdHJ5PWksIG50cmVlPTEwMDApIFxuICAgIG9vYi52YWx1ZXNbaV0gPC0gdGVtcC5tb2RlbCRlcnIucmF0ZVtucm93KHRlbXAubW9kZWwkZXJyLnJhdGUpLDFdXG4gIH1cblxub29iLnZhbHVlcyAjcHJpbnQgb3V0IHRoZSBkaWZmZXJlbnQgb29iIGVycm9yIHZhbHVlcyBhbmQgdGhlIG9uZSB3aXRoIHRoZSBsb3dlc3QgdmFsdWUgaXMgdGhlIG51bWJlciBvZiB2YXJpYWJsZXMgdGhhdCB3b3JrcyBiZXN0LlxuXG5gYGAifQ== -->
+<pre class="r"><code>
+#Set Seed
+set.seed(106)
+
+
+#Plot variable Importance
+
+varImpPlot(SDmodel)
+
+
+
+#Optimum Variables per node
+
+oob.values &lt;- vector(length = 10) 
+
+for (i in 1:10) { 
+    temp.model &lt;- temp.model &lt;- randomForest(sd ~ ., data = WC_data.imputed, mtry=i, ntree=1000) 
+    oob.values[i] &lt;- temp.model$err.rate[nrow(temp.model$err.rate),1]
+  }
+
+oob.values #print out the different oob error values and the one with the lowest value is the number of variables that works best.
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="final-random-forest-model." class="section level3">
+<h3>Final Random Forest Model.</h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG4jU2V0IFNlZWRcbnNldC5zZWVkKDEwNilcblxuXG4jIyBmaW5kIHRoZSBtaW5pbXVtIGVycm9yXG5taW4ob29iLnZhbHVlcylcbiMjIGZpbmQgdGhlIG9wdGltYWwgdmFsdWUgZm9yIG10cnkuLi5cbm10cnlWIDwtIHdoaWNoKG9vYi52YWx1ZXMgPT0gbWluKG9vYi52YWx1ZXMpKVxuIyMgY3JlYXRlIGEgbW9kZWwgZm9yIHByb3hpbWl0aWVzIHVzaW5nIHRoZSBiZXN0IHZhbHVlIGZvciBtdHJ5XG5GaW5hbFNEX21vZGVsIDwtIHJhbmRvbUZvcmVzdChzZCB+IC4sIFxuICAgICAgICAgICAgICAgICAgICAgIGRhdGEgPSBXQ19kYXRhLmltcHV0ZWQsXG4gICAgICAgICAgICAgICAgICAgICAgbnRyZWUgPSA2MDAsIFxuICAgICAgICAgICAgICAgICAgICAgIHByb3hpbWl0eSA9IFRSVUUsIFxuICAgICAgICAgICAgICAgICAgICAgIG10cnkgPSBtdHJ5KVxuRmluYWxTRF9tb2RlbFxuYGBgIn0= -->
+<pre class="r"><code>
+#Set Seed
+set.seed(106)
+
+
+## find the minimum error
+min(oob.values)
+## find the optimal value for mtry...
+mtryV &lt;- which(oob.values == min(oob.values))
+## create a model for proximities using the best value for mtry
+FinalSD_model &lt;- randomForest(sd ~ ., 
+                      data = WC_data.imputed,
+                      ntree = 600, 
+                      proximity = TRUE, 
+                      mtry = mtry)
+FinalSD_model</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="random-forest-mds-plot." class="section level3">
+<h3>Random Forest MDS Plot.</h3>
+<p>A Multidimensional Scaling (MDS) plot is a visual representation of
+the relationships between objects in multidimensional space.</p>
+<p>The distance between points on the plot indicates the dissimilarity
+between the samples. To find out more about MDS Plots, go <a href="https://youtu.be/GEn-_dAyYME?si=N4G3R3lXmsoJe8YE">here</a>.</p>
+<p>Now we are going to:</p>
+<ul>
+<li><p>Utilize the Random Forest model to generate a Multi-Dimensional
+Scaling (MDS) plot.</p></li>
+<li><p>Represent samples in a reduced-dimensional space.</p></li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5cbiNTZXQgU2VlZFxuc2V0LnNlZWQoMTA2KVxuXG4jdGhpcyBzaG93cyBob3cgZWFjaCB2YXJpYWJsZSBpcyByZWxhdGVkIHRvIGVhY2ggb3RoZXJcblxuZGlzdGFuY2UubWF0cml4IDwtIGFzLmRpc3QoMS1tb2RlbCRwcm94aW1pdHkpICMjIGNvbnZlcnRpbmcgdGhlIHByb3hpbWl0eSBtYXRyaXggaW50byBhIGRpc3RhbmNlIG1hdHJpeC5cblxubWRzLnBsb3QgPC0gY21kc2NhbGUoZGlzdGFuY2UubWF0cml4LCBlaWcgPSBUUlVFLCB4LnJldCA9IFRSVUUpXG5cbiMjIGNhbGN1bGF0ZSB0aGUgcGVyY2VudGFnZSBvZiB2YXJpYXRpb24gdGhhdCBlYWNoIE1EUyBheGlzIGFjY291bnRzIGZvci4uLlxubWRzLnZhci5wZXIgPC0gcm91bmQobWRzLnBsb3QkZWlnL3N1bShtZHMucGxvdCRlaWcpKjEwMCwgMSlcblxuIyMgbm93IG1ha2UgYSBmYW5jeSBsb29raW5nIHBsb3QgdGhhdCBzaG93cyB0aGUgTURTIGF4ZXMgYW5kIHRoZSB2YXJpYXRpb246XG5tZHMudmFsdWVzIDwtIG1kcy5wbG90JHBvaW50c1xubWRzLmRhdGEgPC0gZGF0YS5mcmFtZShTYW1wbGU9cm93bmFtZXMobWRzLnZhbHVlcyksXG4gICAgICAgICAgICAgICAgICAgICAgIFg9bWRzLnZhbHVlc1ssMV0sXG4gICAgICAgICAgICAgICAgICAgICAgIFk9bWRzLnZhbHVlc1ssMl0sXG4gICAgICAgICAgICAgICAgICAgICAgIFN0YXR1cz1XQ19kYXRhLmltcHV0ZWQkaGQpXG5cbmdncGxvdChkYXRhPW1kcy5kYXRhLCBhZXMoeD1YLCB5PVksIGxhYmVsPVNhbXBsZSkpICsgXG4gIGdlb21fdGV4dChhZXMoY29sb3I9U3RhdHVzKSkgK1xuICB0aGVtZV9idygpICtcbiAgeGxhYihwYXN0ZShcIk1EUzEgLSBcIiwgbWRzLnZhci5wZXJbMV0sIFwiJVwiLCBzZXA9XCJcIikpICtcbiAgeWxhYihwYXN0ZShcIk1EUzIgLSBcIiwgbWRzLnZhci5wZXJbMl0sIFwiJVwiLCBzZXA9XCJcIikpICtcbiAgZ2d0aXRsZShcIk1EUyBwbG90IHVzaW5nICgxIC0gUmFuZG9tIEZvcmVzdCBQcm94aW1pdGllcylcIilcbiNnZ3NhdmUoZmlsZT1cInJhbmRvbV9mb3Jlc3RfbWRzX3Bsb3QucGRmXCIpXG5cblxuYGBgIn0= -->
+<pre class="r"><code>
+
+#Set Seed
+set.seed(106)
+
+#this shows how each variable is related to each other
+
+distance.matrix &lt;- as.dist(1-model$proximity) ## converting the proximity matrix into a distance matrix.
+
+mds.plot &lt;- cmdscale(distance.matrix, eig = TRUE, x.ret = TRUE)
+
+## calculate the percentage of variation that each MDS axis accounts for...
+mds.var.per &lt;- round(mds.plot$eig/sum(mds.plot$eig)*100, 1)
+
+## now make a fancy looking plot that shows the MDS axes and the variation:
+mds.values &lt;- mds.plot$points
+mds.data &lt;- data.frame(Sample=rownames(mds.values),
+                       X=mds.values[,1],
+                       Y=mds.values[,2],
+                       Status=WC_data.imputed$hd)
+
+ggplot(data=mds.data, aes(x=X, y=Y, label=Sample)) + 
+  geom_text(aes(color=Status)) +
+  theme_bw() +
+  xlab(paste(&quot;MDS1 - &quot;, mds.var.per[1], &quot;%&quot;, sep=&quot;&quot;)) +
+  ylab(paste(&quot;MDS2 - &quot;, mds.var.per[2], &quot;%&quot;, sep=&quot;&quot;)) +
+  ggtitle(&quot;MDS plot using (1 - Random Forest Proximities)&quot;)
+#ggsave(file=&quot;random_forest_mds_plot.pdf&quot;)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+</div>
+</div>
+
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIlJhbmRvbSBGb3Jlc3QgQ2xhc3NpZmljYXRpb24iDQphdXRob3I6ICJJZmVvbWEgT2tvbnllIg0KZGF0ZTogIjIwMjQtMDMtMjYiDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpgYGB7ciBzZXR1cCwgaW5jbHVkZT1GQUxTRX0NCmtuaXRyOjpvcHRzX2NodW5rJHNldChlY2hvID0gVFJVRSkNCmBgYA0KDQojIyBUYXNrcyB7LnRhYnNldH0NCg0KDQoqICoqUmFuZG9tIEZvcmVzdCBCYXNpY3M6KioNCg0KICAgICogVW5kZXJzdGFuZCBSYW5kb20gRm9yZXN0Lg0KICAgIA0KICAgICogQ3JlYXRlIGEgUmFuZG9tIEZvcmVzdCBtb2RlbC4NCiAgICANCiogKipPcHRpbWFsIFBhcmFtZXRlcnM6KioNCg0KICAgICogRGV0ZXJtaW5lIHRoZSBiZXN0IG51bWJlciBvZiB0cmVlcyBpbiB0aGUgZm9yZXN0Lg0KICAgIA0KICAgICogSWRlbnRpZnkgdGhlIG9wdGltYWwgdmFyaWFibGVzIHVzZWQgYXQgZWFjaCBpbnRlcm5hbCBub2RlLg0KICAgIA0KKiAqKlNhbXBsZSBWaXN1YWxpemF0aW9uOioqDQoNCiAgICAqIFBsb3QgTXVsdGktRGltZW5zaW9uYWwgU2NhbGluZyAoTURTKSB1c2luZyB0aGUgUmFuZG9tIEZvcmVzdCBtb2RlbC4NCg0KDQoNCg0KIyMjIExvYWQgUGFja2FnZXMgYW5kIERhdGEuDQoNCg0KKiBMb2FkIHBhY2thZ2VzIGFuZCBkYXRhIG5lZWRlZC4gDQoNCiAgKiBGb3IgdGhpcyBleGVyY2lzZSB0aGUgcGFja2FnZXMgdGhhdCB3aWxsIGJlIHVzZWQgYXJlIHRpZHl2ZXJzZSwgY2FyZXQsIGFuZCByYW5kb21Gb3Jlc3QuIA0KDQogIA0KDQoNCmBgYHtyfQ0KDQpsaWJyYXJ5KHBhY21hbikNCnBfbG9hZCh0aWR5dmVyc2UsIHJhbmRvbUZvcmVzdCwgY2FyZXQpDQoNCg0KIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjDQojbG9hZGluZyB0aGUgZGF0YQ0KIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjDQoNCg0KDQpXQ19kYXRhIDwtIHJlYWQuY3N2KFdDX2RhdGEsIGhlYWRlciA9IEZBTFNFKQ0KaGVhZChXQ19kYXRhKQ0KDQoNCmBgYA0KDQoNCg0KDQoNCiMjIyBTcGxpdCB0aGUgZGF0YS4NCg0KDQpgYGB7cn0NCiNTZXQgU2VlZA0Kc2V0LnNlZWQoMTA2KQ0KDQojc3BsaXR0aW5nIHRoZSBkYXRhDQpzcGxpdCA8LSBzYW1wbGUuc3BsaXQoV0NfZGF0YSwgc3BsaXRyYXRpbyA9IDAuNzUpDQoNCiNHZXQgdHJhaW5pbmcgZGF0YQ0KDQp0cmFpbiA8LSBzdWJzZXQoV0NfZGF0YSwgc3BsaXQgPT0gIlRSVUUiKQ0KDQojR2V0IFRlc3QgZGF0YQ0KDQp0ZXN0IDwtIHN1YnNldChXQ19kYXRhLCBzcGxpdCA9PSAiRkFMU0UiKQ0KYGBgDQoNCg0KDQoNCiMjIyBCdWlsZCBSYW5kb20gRm9yZXN0IG1vZGVsLg0KDQoqIFRoZSBjb25mdXNpb24gbWF0cml4IGZvciB0aGUgZm9yZXN0IHdpdGggbnRyZWUgdHJlZXMgYW5kIGl0IGlzIGxhaWQgb3V0IGFzOg0KDQoNCg0KfCAgICAgICAgICAgICAgICAgICAgfCAqKlByZXNlbnQqKiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgKipBYnNlbnQqKiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB8DQp8IC0tLS0tLS0tLS0tLS0tLS0tLSB8IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gfCAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIHwNCnwgKipQcmVzZW50KiogICAgICAgIHwgTnVtYmVyIG9mIGJpcmQgcHJlc2VudCBjb3JyZWN0bHkgY2FsbGVkICJwcmVzZW50IiAgICAgICB8IE51bWJlciBvZiBiaXJkIHByZXNlbnQgaW5jb3JyZWN0bHkgY2FsbGVkICJhYnNlbnQiICAgICAgfA0KfCAqKkFic2VudCoqICAgICAgICAgfCBOdW1iZXIgb2YgYmlyZCBhYnNlbnQgaW5jb3JyZWN0bHkgY2FsbGVkICJwcmVzZW50IiAgICAgIHwgTnVtYmVyIG9mIGJpcmQgYWJzZW50IGNvcnJlY3RseSBjYWxsZWQgImFic2VudCIgICAgICAgICB8DQoNCg0KDQoNCmBgYHtyfQ0KDQojU2V0IFNlZWQNCnNldC5zZWVkKDEwNikgDQoNCldDX2RhdGEuaW1wdXRlZCA8LSByZkltcHV0ZShzZCB+IC4sICAjc2QgPSBzcGVjaWUgZGlzdHJpYnV0aW9uDQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBkYXRhID0gV0NfZGF0YSwgDQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpdGVyID0gNikgICNpdGVyIHNwZWNpZmllcyBob3cgbWFueSByZiByZkltcHV0ZSgpIHNob3VsZCBidWlsZCB0byBlc3RpbWF0ZSB0aGUgbWlzc2luZyB2YWx1ZXMNCg0KYGBgDQoNClRoZXJlIGFyZSAyIE5BIHZhbHVlcyBpbiB0aGUgZGF0YXNldCBhbmQgdGhpcyBnZW5lcmF0ZXMgdGhlIE9PQiBlcnJvciByYXRlIGZvciBlYWNoIGVzdGltYXRlLg0KDQoNCmBgYHtyfQ0KDQojU2V0IFNlZWQNCnNldC5zZWVkKDEwNikNCg0KI3RoZSByZiBtb2RlbA0KU0Rtb2RlbCA8LSByYW5kb21Gb3Jlc3Qoc2QgfiAuLCANCiAgICAgICAgICAgICAgICAgICAgICAgIGRhdGEgPSBXQ19kYXRhLmltcHV0ZWQsIA0KICAgICAgICAgICAgICAgICAgICAgICAgUHJveGltaXR5ID0gVFJVRSkNClNEbW9kZWwgDQoNCg0KDQojbG9vayBhdCBjb25mdXNpb24gbWF0cml4IGFuZCBwLXZhbHVlcw0KDQp5X3ByZWQgPC0gcHJlZGljdChTRG1vZGVsLCBuZXdkYXRhID0gV0NfZGF0YS5pbXB1dGVkWy0xXSkgIzEgaXMgdGhlIHNkIHZhcmlhYmxlIHdoaWNoIGlzIGJlaW5nIHByZWRpY3RlZCBhbmQgKC0xKSByZW1vdmVzIHRoYXQgdmFyaWFibGUNCg0KY29uZnVzaW9uTWF0cml4KHlfcHJlZCwgdGVzdFsgLCAxXSkgDQoNCmBgYA0KDQoNCg0KIyMjIE9wdGltdW0gblRyZWVzLg0KDQoNCiogQXNzZXNzIHRoZSBvcHRpbWFsIG51bWJlciBvZiB0cmVlcyAoblRyZWVzKSBmb3IgdGhlIG1vZGVsIC0gaXMgdGhlIFJGIGJpZyBlbm91Z2g/DQoNCiAgKiBIZWxwcyBlbmhhbmNlIG1vZGVsIHBlcmZvcm1hbmNlIGFuZCBwcmV2ZW50IG92ZXJmaXR0aW5nLg0KDQoqIFVwIHRvIGEgcG9pbnQsIHRoZSBtb3JlIHRyZWVzIGluIHRoZSBmb3Jlc3QsIHRoZSBiZXR0ZXIuDQoNCiAgICAqIFlvdSBjYW4gdGVsbCB3aGVuIHlvdSd2ZSBtYWRlIGVub3VnaCB3aGVuIHRoZSBPT0Igbm8gbG9uZ2VyIGltcHJvdmVzLg0KDQoNCmBgYHtyfQ0KDQojU2V0IFNlZWQNCnNldC5zZWVkKDEwNikNCg0KI3Bsb3R0aW5nIHRoZSBlcnJvciByYXRlcyBmb3IgZWFjaCB0cmVlIGJhc2VkIG9uIGEgbWF0cml4IHdpdGhpbiB0aGUgbW9kZWwgY2FsbGVkIGVyci5yYXRlDQpoZWFkKFNEbW9kZWwkZXJyLnJhdGUsIDUpDQoNCm9vYi5lcnJvci5kYXRhIDwtIGRhdGEuZnJhbWUoDQogIFRyZWVzID0gcmVwKDE6bnJvdyhTRG1vZGVsJGVyci5yYXRlKSwgdGltZXMgPSAzKSwNCiAgVHlwZSA9IHJlcChjKCJPT0IiLCAiUHJlc2VudCIsICJBYnNlbnQiKSwgZWFjaCA9IG5yb3coU0Rtb2RlbCRlcnIucmF0ZSkpLA0KICBFcnJvciA9IGMoU0Rtb2RlbCRlcnIucmF0ZVsgLCAiT09CIl0sDQogICAgICAgICAgICBTRG1vZGVsJGVyci5yYXRlWyAsICJQcmVzZW50Il0sDQogICAgICAgICAgICBTRG1vZGVsJGVyci5yYXRlWyAsICJBYnNlbnQiXSkNCikNCg0Kb29iLmVycm9yLmRhdGEgJT4lIA0KICBnZ3Bsb3QoYWVzKFRyZWVzLCBFcnJvcikpICsNCiAgZ2VvbV9saW5lKGFlcyhjb2xvciA9IFR5cGUpKQ0KDQpgYGANCg0KDQoNCmBgYHtyfQ0KDQojU2V0IFNlZWQNCnNldC5zZWVkKDEwNikNCg0KI21ha2luZyBtb2RlbCB3aXRoIDEwMDAgdHJlZXMNCg0KU0Rtb2RlbF8xMDAwIDwtIHJhbmRvbUZvcmVzdChzZCB+IC4sIA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICBkYXRhID0gV0NfZGF0YS5pbXB1dGVkLCANCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbnRyZWUgPSAxMDAwLCANCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgUHJveGltaXR5ID0gVFJVRSkNClNEbW9kZWxfMTAwMCANCmBgYA0KDQoNCg0KYGBge3J9DQoNCg0KI1NldCBTZWVkDQpzZXQuc2VlZCgxMDYpDQoNCg0KI3RvIHNlZSBpZiBwbG90dGluZyB3aXRoIDEwMDAgaXMgYmV0dGVyLCBwbG90IGVycm9yIHJhdGUNCg0Kb29iLmVycm9yLmRhdGExIDwtIGRhdGEuZnJhbWUoDQogIFRyZWVzID0gcmVwKDE6bnJvdyhTRG1vZGVsXzEwMDAkZXJyLnJhdGUpLCB0aW1lcyA9IDMpLA0KICBUeXBlID0gcmVwKGMoIk9PQiIsICJQcmVzZW50IiwgIkFic2VudCIpLCBlYWNoID0gbnJvdyhTRG1vZGVsXzEwMDAkZXJyLnJhdGUpKSwNCiAgRXJyb3IgPSBjKEhEbW9kZWxfMTAwMCRlcnIucmF0ZVsgLCAiT09CIl0sDQogICAgICAgICAgICBIRG1vZGVsXzEwMDAkZXJyLnJhdGVbICwgIlByZXNlbnQiXSwNCiAgICAgICAgICAgIEhEbW9kZWxfMTAwMCRlcnIucmF0ZVsgLCAiQWJzZW50Il0pDQopDQoNCm9vYi5lcnJvci5kYXRhMSAlPiUgDQogIGdncGxvdChhZXMoVHJlZXMsIEVycm9yKSkgKw0KICBnZW9tX2xpbmUoYWVzKGNvbG9yID0gVHlwZSkpDQoNCmBgYA0KDQoNCg0KDQoNCg0KIyMjIE9wdGltdW0gVmFyaWFibGUgU2VsZWN0aW9uLg0KDQoNCiogRXZhbHVhdGUgdGhlIGJlc3QgbnVtYmVyIG9mIHZhcmlhYmxlcyB0byB1c2UgYXQgZWFjaCBpbnRlcm5hbCBub2RlIGluIHRoZSBkZWNpc2lvbiB0cmVlLg0KDQpgYGB7cn0NCg0KI1NldCBTZWVkDQpzZXQuc2VlZCgxMDYpDQoNCg0KI1Bsb3QgdmFyaWFibGUgSW1wb3J0YW5jZQ0KDQp2YXJJbXBQbG90KFNEbW9kZWwpDQoNCg0KDQojT3B0aW11bSBWYXJpYWJsZXMgcGVyIG5vZGUNCg0Kb29iLnZhbHVlcyA8LSB2ZWN0b3IobGVuZ3RoID0gMTApIA0KDQpmb3IgKGkgaW4gMToxMCkgeyANCiAgICB0ZW1wLm1vZGVsIDwtIHRlbXAubW9kZWwgPC0gcmFuZG9tRm9yZXN0KHNkIH4gLiwgZGF0YSA9IFdDX2RhdGEuaW1wdXRlZCwgbXRyeT1pLCBudHJlZT0xMDAwKSANCiAgICBvb2IudmFsdWVzW2ldIDwtIHRlbXAubW9kZWwkZXJyLnJhdGVbbnJvdyh0ZW1wLm1vZGVsJGVyci5yYXRlKSwxXQ0KICB9DQoNCm9vYi52YWx1ZXMgI3ByaW50IG91dCB0aGUgZGlmZmVyZW50IG9vYiBlcnJvciB2YWx1ZXMgYW5kIHRoZSBvbmUgd2l0aCB0aGUgbG93ZXN0IHZhbHVlIGlzIHRoZSBudW1iZXIgb2YgdmFyaWFibGVzIHRoYXQgd29ya3MgYmVzdC4NCg0KYGBgDQoNCg0KDQoNCg0KIyMjIEZpbmFsIFJhbmRvbSBGb3Jlc3QgTW9kZWwuDQoNCg0KYGBge3J9DQoNCiNTZXQgU2VlZA0Kc2V0LnNlZWQoMTA2KQ0KDQoNCiMjIGZpbmQgdGhlIG1pbmltdW0gZXJyb3INCm1pbihvb2IudmFsdWVzKQ0KIyMgZmluZCB0aGUgb3B0aW1hbCB2YWx1ZSBmb3IgbXRyeS4uLg0KbXRyeVYgPC0gd2hpY2gob29iLnZhbHVlcyA9PSBtaW4ob29iLnZhbHVlcykpDQojIyBjcmVhdGUgYSBtb2RlbCBmb3IgcHJveGltaXRpZXMgdXNpbmcgdGhlIGJlc3QgdmFsdWUgZm9yIG10cnkNCkZpbmFsU0RfbW9kZWwgPC0gcmFuZG9tRm9yZXN0KHNkIH4gLiwgDQogICAgICAgICAgICAgICAgICAgICAgZGF0YSA9IFdDX2RhdGEuaW1wdXRlZCwNCiAgICAgICAgICAgICAgICAgICAgICBudHJlZSA9IDYwMCwgDQogICAgICAgICAgICAgICAgICAgICAgcHJveGltaXR5ID0gVFJVRSwgDQogICAgICAgICAgICAgICAgICAgICAgbXRyeSA9IG10cnkpDQpGaW5hbFNEX21vZGVsDQpgYGANCg0KDQoNCiMjIyBSYW5kb20gRm9yZXN0IE1EUyBQbG90Lg0KDQpBIE11bHRpZGltZW5zaW9uYWwgU2NhbGluZyAoTURTKSBwbG90IGlzIGEgdmlzdWFsIHJlcHJlc2VudGF0aW9uIG9mIHRoZSByZWxhdGlvbnNoaXBzIGJldHdlZW4gb2JqZWN0cyBpbiBtdWx0aWRpbWVuc2lvbmFsIHNwYWNlLiANCg0KVGhlIGRpc3RhbmNlIGJldHdlZW4gcG9pbnRzIG9uIHRoZSBwbG90IGluZGljYXRlcyB0aGUgZGlzc2ltaWxhcml0eSBiZXR3ZWVuIHRoZSBzYW1wbGVzLiBUbyBmaW5kIG91dCBtb3JlIGFib3V0IE1EUyBQbG90cywgZ28gW2hlcmVdKGh0dHBzOi8veW91dHUuYmUvR0VuLV9kQXlZTUU/c2k9TjRHM1IzbFhtc29KZThZRSkuDQoNCk5vdyAgd2UgYXJlIGdvaW5nIHRvOg0KDQoqIFV0aWxpemUgdGhlIFJhbmRvbSBGb3Jlc3QgbW9kZWwgdG8gZ2VuZXJhdGUgYSBNdWx0aS1EaW1lbnNpb25hbCBTY2FsaW5nIChNRFMpIHBsb3QuDQoNCiogUmVwcmVzZW50IHNhbXBsZXMgaW4gYSByZWR1Y2VkLWRpbWVuc2lvbmFsIHNwYWNlLg0KDQoNCg0KDQpgYGB7cn0NCg0KDQojU2V0IFNlZWQNCnNldC5zZWVkKDEwNikNCg0KI3RoaXMgc2hvd3MgaG93IGVhY2ggdmFyaWFibGUgaXMgcmVsYXRlZCB0byBlYWNoIG90aGVyDQoNCmRpc3RhbmNlLm1hdHJpeCA8LSBhcy5kaXN0KDEtbW9kZWwkcHJveGltaXR5KSAjIyBjb252ZXJ0aW5nIHRoZSBwcm94aW1pdHkgbWF0cml4IGludG8gYSBkaXN0YW5jZSBtYXRyaXguDQoNCm1kcy5wbG90IDwtIGNtZHNjYWxlKGRpc3RhbmNlLm1hdHJpeCwgZWlnID0gVFJVRSwgeC5yZXQgPSBUUlVFKQ0KDQojIyBjYWxjdWxhdGUgdGhlIHBlcmNlbnRhZ2Ugb2YgdmFyaWF0aW9uIHRoYXQgZWFjaCBNRFMgYXhpcyBhY2NvdW50cyBmb3IuLi4NCm1kcy52YXIucGVyIDwtIHJvdW5kKG1kcy5wbG90JGVpZy9zdW0obWRzLnBsb3QkZWlnKSoxMDAsIDEpDQoNCiMjIG5vdyBtYWtlIGEgZmFuY3kgbG9va2luZyBwbG90IHRoYXQgc2hvd3MgdGhlIE1EUyBheGVzIGFuZCB0aGUgdmFyaWF0aW9uOg0KbWRzLnZhbHVlcyA8LSBtZHMucGxvdCRwb2ludHMNCm1kcy5kYXRhIDwtIGRhdGEuZnJhbWUoU2FtcGxlPXJvd25hbWVzKG1kcy52YWx1ZXMpLA0KICAgICAgICAgICAgICAgICAgICAgICBYPW1kcy52YWx1ZXNbLDFdLA0KICAgICAgICAgICAgICAgICAgICAgICBZPW1kcy52YWx1ZXNbLDJdLA0KICAgICAgICAgICAgICAgICAgICAgICBTdGF0dXM9V0NfZGF0YS5pbXB1dGVkJGhkKQ0KDQpnZ3Bsb3QoZGF0YT1tZHMuZGF0YSwgYWVzKHg9WCwgeT1ZLCBsYWJlbD1TYW1wbGUpKSArIA0KICBnZW9tX3RleHQoYWVzKGNvbG9yPVN0YXR1cykpICsNCiAgdGhlbWVfYncoKSArDQogIHhsYWIocGFzdGUoIk1EUzEgLSAiLCBtZHMudmFyLnBlclsxXSwgIiUiLCBzZXA9IiIpKSArDQogIHlsYWIocGFzdGUoIk1EUzIgLSAiLCBtZHMudmFyLnBlclsyXSwgIiUiLCBzZXA9IiIpKSArDQogIGdndGl0bGUoIk1EUyBwbG90IHVzaW5nICgxIC0gUmFuZG9tIEZvcmVzdCBQcm94aW1pdGllcykiKQ0KI2dnc2F2ZShmaWxlPSJyYW5kb21fZm9yZXN0X21kc19wbG90LnBkZiIpDQoNCg0KYGBg</div>
 
 
 
