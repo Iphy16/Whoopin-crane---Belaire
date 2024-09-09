@@ -1,5 +1,5 @@
- Sys.setLanguage("en")
- rm(list = ls())
+Sys.setLanguage("en")
+rm(list = ls())
 
 library(pacman)
 p_load(tidyverse, randomForest, caret, caTools, raster, sf)
@@ -11,7 +11,7 @@ p_load(tidyverse, randomForest, caret, caTools, raster, sf)
 
 
 
-WC_data <- read.csv("D:/KDWP_WhoopingCrane/HabitatAssessment_Belaire_New/HabitatAssessment_Belaire/Tables/Final Telemetry Data.csv", header=TRUE, sep=",")
+WC_data <- read.csv("D:/KDWP_WhoopingCrane/HabitatAssessment_Belaire_New/HabitatAssessment_Belaire/Tables/Final Telemetry Data1.csv", header=TRUE, sep=",")
 
 head(WC_data)
 
@@ -59,7 +59,7 @@ str(WC_data)
 formula <- sd ~ pcu + pcw + pca + pcr + ec + be
 
 # Split the data into training and testing sets
-set.seed(100)
+set.seed(150)
 trainIndex <- createDataPartition(WC_data$sd, p = 0.75, list = FALSE)
 trainData <- WC_data[trainIndex, ]
 testData <- WC_data[-trainIndex, ]
@@ -78,17 +78,17 @@ summary(WC_data)
 # Fit the Random Forest model
 # Method 1
 SDmodel <- randomForest(formula, 
-                         data = trainData, 
-                         importance = TRUE,
-                         Proximity = TRUE,
-                         ntree = 500)
+                        data = trainData, 
+                        importance = TRUE,
+                        Proximity = TRUE,
+                        ntree = 500)
 SDmodel
 
 # Method 2
 SDmodel1 <- randomForest(sd ~ ., 
-                        data = trainData, 
-                        importance = TRUE,
-                        Proximity = TRUE)
+                         data = trainData, 
+                         importance = TRUE,
+                         Proximity = TRUE)
 SDmodel1 
 
 
@@ -256,14 +256,6 @@ bearing_raster <- raster("D:/KDWP_WhoopingCrane/HabitatAssessment_Belaire_New/Ha
 
 
 
-# Reclassify ecotone raster if it is categorical
-# Example: Assume "Ecotone1", "Ecotone2", etc., were categories
-unique_values <- unique(values(ecotone_raster))
-reclass_matrix <- cbind(unique_values, 1:length(unique_values))  # Reclassifying to 1, 2, 3,...
-
-ecotone_raster_reclass <- reclassify(ecotone_raster, reclass_matrix)
-
-
 # Stack the rasters
 env_var <- stack(urban_raster, wetland_raster, agric_raster, road_raster, ecotone_raster, bearing_raster)
 names(env_var) <- c("pcu", "pcw", "pca", "pcr", "ec", "be")
@@ -282,30 +274,6 @@ plot(suitability_map, main = "Whooping Crane Habitat Suitability Map")
 
 
 # Save the suitability map
-writeRaster(suitability_map, "D:/KDWP_WhoopingCrane/HabitatAssessment_Belaire_New/HabitatAssessment_Belaire/Raster Data/suitability_map.tif", format = "GTiff", overwrite = TRUE)
-
-
-############################################################################################################################################
-
-# Inspect the rasters
-unique_values_urban <- unique(values(urban_raster))
-unique_values_wetland <- unique(values(wetland_raster))
-unique_values_agric <- unique(values(agric_raster))
-unique_values_road <- unique(values(road_raster))
-unique_values_ecotone <- unique(values(ecotone_raster))
-unique_values_bearing <- unique(values(bearing_raster))
-
-# Print the results
-print(unique_values_urban)
-print(unique_values_wetland)
-print(unique_values_agric)
-print(unique_values_road)
-print(unique_values_ecotone)
-print(unique_values_bearing)
-
-
-if (is.factor(ecotone_raster) | is.character(ecotone_raster)) {
-  ecotone_raster <- as.numeric(as.character(values(ecotone_raster)))
-}
+writeRaster(suitability_map, "D:/KDWP_WhoopingCrane/HabitatAssessment_Belaire_New/HabitatAssessment_Belaire/Raster Data/suitability_map_sample.tif", format = "GTiff", overwrite = TRUE)
 
 
